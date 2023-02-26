@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  uid        String    @id @default(uuid())
+  followedBy Follows[] @relation("following")
+  following  Follows[] @relation("follower")
+  Tweet      Tweet[]
+  Like       Like[]
+}
+
+model Follows {
+  follower    User    @relation("follower", fields: [followerId], references: [uid], onDelete: Cascade, onUpdate: Cascade)
+  followerId  String
+  following   User    @relation("following", fields: [followingId], references: [uid], onDelete: Cascade, onUpdate: Cascade)
+  followingId String
+  closeFriend Boolean @default(false)
+
+  @@id([followerId, followingId])
+}
+
+model Like {
+  tweet   Tweet  @relation(fields: [tweetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tweetId Int
+  user    User   @relation(fields: [userUid], references: [uid], onDelete: Cascade, onUpdate: Cascade)
+  userUid String
+
+  @@id([userUid, tweetId])
+}
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  author    User     @relation(fields: [userUid], references: [uid], onDelete: Cascade, onUpdate: Cascade)
+  parentId  Int?
+  parent    Tweet?   @relation("TeacherStudents", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  children  Tweet[]  @relation("TeacherStudents")
+  userUid   String
+  imageURL  String?
+  body      String   @db.VarChar(1024)
+  isPrivate Boolean  @default(false)
+  createAt  DateTime @default(now())
+  Like      Like[]
+}
