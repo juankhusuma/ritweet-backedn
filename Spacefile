@@ -1,0 +1,18 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: server
+    src: .
+    engine: nodejs16
+    primary: true
+    commands:
+      - npx prisma migrate deploy
+      - npm install
+      - npm run build
+    presets:
+      env:
+        - name: DATABASE_URL
+        - default: "postgresql://postgres:cdWP7LlwJvAZhtoYrxJg@containers-us-west-163.railway.app:8022/railway"
+    include:
+      - dist
+    run: "npm start"
